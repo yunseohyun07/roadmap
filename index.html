@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f5f5b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="로드맵">
+<title>대학 로드맵</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@400;600;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font-size:14px}
+[hidden]{display:none!important}
+img{max-width:100%}
+/* Layout: 대학 생활을 학년별 기둥으로 세운 로드맵. 각 기둥은 1학기·여름·2학기·겨울 칸으로 나뉨. #widget 은 작은 요약 카드 */
+:root{
+  --bg:#eef1ee; --paper:#fbfcfa; --ink:#18231f; --muted:#5d6b65; --line:#d3dad5;
+  --accent:#1f5f5b; --accent-soft:#d7e7e3; --ochre:#b5791d; --ochre-soft:#f4e6cc;
+  --t-class:#2f5d8a; --t-test:#9a3f5c; --t-act:#4b7a3a; --t-etc:#6a5d8c;
+  --danger:#a63a32;
+  --f-display:"Hahmlet","Nanum Myeongjo",Georgia,serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121815; --paper:#19211d; --ink:#e4ebe7; --muted:#93a29b; --line:#2c3833;
+  --accent:#6fb8ae; --accent-soft:#1f3532; --ochre:#e0a650; --ochre-soft:#3a2d18;
+  --t-class:#7fb0e0; --t-test:#e391ab; --t-act:#9acb86; --t-etc:#b4a8e0;
+  --danger:#e07a70; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121815; --paper:#19211d; --ink:#e4ebe7; --muted:#93a29b; --line:#2c3833;
+  --accent:#6fb8ae; --accent-soft:#1f3532; --ochre:#e0a650; --ochre-soft:#3a2d18;
+  --t-class:#7fb0e0; --t-test:#e391ab; --t-act:#9acb86; --t-etc:#b4a8e0;
+  --danger:#e07a70; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.label{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.wrap{max-width:1240px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+
+/* header */
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(34px,6vw,52px);line-height:1;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.sub{color:var(--muted);margin:6px 0 0}
+.hctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ghost{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 14px;font-size:13.5px}
+.ghost:hover{border-color:var(--muted)}
+.start{display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted)}
+.start input{width:76px;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:4px 8px;font-family:var(--f-mono)}
+
+/* overview strip */
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-top:1.5px solid var(--ink);border-bottom:1px solid var(--line)}
+.strip>div{padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.strip>div+div{border-left:1px solid var(--line)}
+.strip .v{font-family:var(--f-display);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.15}
+.strip .v span{font-size:14px;color:var(--muted);font-weight:400}
+.strip .next{font-size:14.5px;font-weight:500;overflow-wrap:anywhere}
+
+.banner{background:var(--ochre-soft);border-radius:8px;padding:10px 14px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:14px}
+.banner button{border:1px solid var(--ochre);background:transparent;border-radius:999px;padding:4px 12px;font-size:13px}
+
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:9px;height:9px;border-radius:2px;display:inline-block}
+
+/* roadmap board */
+.board-scroll{overflow-x:auto;padding-bottom:6px}
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,1fr);gap:14px;align-items:start}
+.year{background:var(--paper);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;min-width:0}
+.year.now{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.yhead{padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.yhead .y{font-family:var(--f-display);font-weight:800;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.yhead .g{font-size:13.5px;color:var(--muted);margin-top:4px;display:flex;gap:8px;align-items:center}
+.yhead .g b{color:var(--accent);font-weight:600}
+.ypct{font-family:var(--f-mono);font-size:12px;color:var(--muted);text-align:right}
+.ybar{height:4px;background:var(--bg);border-radius:2px;margin-top:6px;width:64px;margin-left:auto;overflow:hidden}
+.ybar i{display:block;height:100%;background:var(--accent)}
+.term{padding:10px 16px 12px;display:flex;flex-direction:column;gap:6px}
+.term+.term{border-top:1px dashed var(--line)}
+.term.now{background:linear-gradient(90deg,var(--ochre-soft),transparent 70%)}
+.term.now .label{color:var(--ochre)}
+.term ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.it{display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:8px;align-items:start;border-left:3px solid var(--c);padding-left:8px}
+.it input[type=checkbox]{margin:3px 0 0;width:15px;height:15px;accent-color:var(--accent)}
+.it .body{min-width:0;display:flex;flex-direction:column;gap:2px}
+.it .t{font-size:14.5px;overflow-wrap:anywhere;cursor:pointer}
+.it.done .t{color:var(--muted);text-decoration:line-through}
+.it .m{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.it .m .type{color:var(--c);font-weight:600}
+.it .m .tgt{font-family:var(--f-mono);border:1px solid var(--line);border-radius:4px;padding:0 5px;color:var(--ink)}
+.it .m .due.soon{color:var(--danger);font-weight:600}
+.it .x{border:none;background:none;color:var(--muted);opacity:0;padding:0 2px;font-size:15px;line-height:1.3}
+.it:hover .x,.it .x:focus{opacity:1}
+.c-class{--c:var(--t-class)} .c-test{--c:var(--t-test)} .c-act{--c:var(--t-act)} .c-etc{--c:var(--t-etc)}
+.addbtn{border:none;background:none;color:var(--muted);font-size:13px;text-align:left;padding:2px 0}
+.addbtn:hover{color:var(--accent)}
+.emptyterm{font-size:12.5px;color:var(--muted);opacity:.7}
+
+/* add / edit sheet */
+.sheet{display:flex;flex-direction:column;gap:8px;background:var(--bg);border-radius:8px;padding:10px}
+.sheet input,.sheet select{border:1px solid var(--line);background:var(--paper);border-radius:6px;padding:6px 8px;font-size:14px;width:100%;min-width:0}
+.sheet .row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sheet .acts{display:flex;gap:6px;justify-content:flex-end}
+.primary{background:var(--accent);color:var(--paper);border:none;border-radius:999px;padding:6px 14px;font-weight:600;font-size:13.5px}
+.plain{border:none;background:none;color:var(--muted);font-size:13.5px}
+.danger{border:none;background:none;color:var(--danger);font-size:13.5px;margin-right:auto}
+
+.addyear{border:1.5px dashed var(--line);border-radius:12px;background:transparent;color:var(--muted);min-height:120px;font-size:14px}
+.addyear:hover{border-color:var(--accent);color:var(--accent)}
+.yconfirm{font-size:12.5px;display:flex;gap:6px;align-items:center}
+.icon{border:none;background:none;color:var(--muted);font-size:12.5px;padding:2px 4px}
+.icon:hover{color:var(--danger)}
+
+footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+/* widget view */
+.widget{max-width:380px;margin:0 auto;padding-block:20px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wcard{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.wtop{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.wtop .y{font-family:var(--f-display);font-weight:800;font-size:28px;line-height:1}
+.wtop .g{font-size:13px;color:var(--muted)}
+.ring{width:64px;height:64px;flex:none}
+.ring text{font-family:var(--f-mono);font-size:13px;fill:var(--ink)}
+.wlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.wlist li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;border-left:3px solid var(--c);padding-left:10px;align-items:baseline}
+.wlist .t{font-size:14.5px;font-weight:500;overflow-wrap:anywhere}
+.wlist .s{font-size:12px;color:var(--muted)}
+.wlist .d{font-family:var(--f-mono);font-size:12px;color:var(--muted);white-space:nowrap}
+.wlist .d.soon{color:var(--danger)}
+.wfoot{display:flex;justify-content:space-between;font-size:12.5px}
+.wfoot a{color:var(--accent);text-decoration:none}
+
+@media (max-width:700px){
+  .board-scroll{overflow:visible}
+  .board{grid-auto-flow:row;grid-auto-columns:auto;grid-template-columns:minmax(0,1fr)}
+  .it .x{opacity:1}
+  .strip>div+div{border-left:none}
+  .strip>div:nth-child(even){border-left:1px solid var(--line)}
+}
+</style>
+
+</head>
+<body>
+<div id="full">
+<div class="wrap">
+  <header>
+    <div>
+      <h1>대학 로드맵</h1>
+      <p class="sub">학년마다 들을 수업, 따야 할 시험, 해볼 활동을 학기 단위로 정리해요.</p>
+    </div>
+    <div class="hctl">
+      <label class="start" for="startYear">입학 연도 <input id="startYear" type="number" min="2000" max="2100" inputmode="numeric"></label>
+      <a class="ghost" href="#widget" style="text-decoration:none">위젯 보기</a>
+      <button class="ghost" id="exportBtn">백업 저장</button>
+      <label class="ghost" for="importFile" style="cursor:pointer">백업 불러오기</label>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+    </div>
+  </header>
+
+  <section class="strip" aria-label="요약">
+    <div><span class="label">지금</span><span class="v" id="sNow">—</span></div>
+    <div><span class="label">완료</span><span class="v" id="sDone">0</span></div>
+    <div><span class="label">이번 학기 남은 일</span><span class="v" id="sTerm">0</span></div>
+    <div><span class="label">가장 가까운 마감</span><span class="next" id="sNext">없음</span></div>
+  </section>
+
+  <div class="banner" id="sampleBanner" hidden>
+    <span>예시 계획이 보이고 있어요. 하나라도 추가·수정하면 내 로드맵으로 저장됩니다.</span>
+    <button id="clearSample">비우고 새로 시작</button>
+  </div>
+
+  <div class="legend" aria-label="종류">
+    <span><i class="dot" style="background:var(--t-class)"></i>수업</span>
+    <span><i class="dot" style="background:var(--t-test)"></i>시험·자격증</span>
+    <span><i class="dot" style="background:var(--t-act)"></i>활동</span>
+    <span><i class="dot" style="background:var(--t-etc)"></i>기타</span>
+  </div>
+
+  <div class="board-scroll"><div class="board" id="board"></div></div>
+
+  <footer>
+    <span id="saveState">불러오는 중…</span>
+    <span>항목 이름을 누르면 수정할 수 있어요 · 기기를 바꿀 땐 백업 저장 → 백업 불러오기</span>
+  </footer>
+</div>
+</div>
+
+<div id="widgetView" hidden>
+  <div class="widget"><div class="wcard" id="wcard"></div></div>
+</div>
+
+<script>
+(function(){
+  const TYPES={class:"수업",test:"시험·자격증",act:"활동",etc:"기타"};
+  const TERMS=[["s1","1학기"],["su","여름방학"],["s2","2학기"],["wi","겨울방학"]];
+  const TERM_ORDER={s1:0,su:1,s2:2,wi:3};
+  const now=new Date();
+  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const $=id=>document.getElementById(id);
+  const uid=()=>Math.random().toString(36).slice(2,9);
+  const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+  let state=null,isSample=false,store=null;
+  let editing=null;   // {year,term,id?}
+  let confirmYear=null;
+
+  function sample(){
+    const y=now.getFullYear();
+    return {startYear:y,count:4,items:[
+      {id:uid(),year:y,term:"s2",type:"test",title:"토플 시험 보기",target:"5.5",due:`${y}-12-20`,done:false},
+      {id:uid(),year:y,term:"s2",type:"class",title:"대학 글쓰기",target:"",due:"",done:true},
+      {id:uid(),year:y,term:"wi",type:"act",title:"코딩 부트캠프 4주",target:"",due:"",done:false},
+      {id:uid(),year:y+1,term:"s1",type:"class",title:"선형대수학",target:"A0 이상",due:"",done:false},
+      {id:uid(),year:y+1,term:"s1",type:"class",title:"자료구조",target:"",due:"",done:false},
+      {id:uid(),year:y+1,term:"su",type:"act",title:"교환학생 지원서 제출",target:"",due:`${y+1}-07-31`,done:false},
+      {id:uid(),year:y+2,term:"s1",type:"class",title:"머신러닝 개론",target:"",due:"",done:false},
+      {id:uid(),year:y+2,term:"s2",type:"act",title:"교환학생 한 학기",target:"",due:"",done:false},
+      {id:uid(),year:y+3,term:"su",type:"act",title:"여름 인턴십",target:"",due:"",done:false},
+      {id:uid(),year:y+3,term:"s2",type:"class",title:"졸업 프로젝트",target:"",due:"",done:false}
+    ]};
+  }
+
+  /* storage */
+  function localStore(){return {kind:"local",
+    async load(){try{const s=localStorage.getItem("roadmap");return s?JSON.parse(s):null}catch(e){return null}},
+    async save(d){try{localStorage.setItem("roadmap",JSON.stringify(d))}catch(e){throw e}}}}
+  async function initStore(){return localStore()}
+  let saveTimer=null;
+  function touch(){
+    if(isSample){isSample=false;$("sampleBanner").hidden=true}
+    $("saveState").textContent="저장 중…";
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(async function run(){
+      if(!store){saveTimer=setTimeout(run,400);return}
+      try{await store.save(JSON.parse(JSON.stringify(state)));$("saveState").textContent="이 브라우저에 저장됨"}
+      catch(e){$("saveState").textContent="저장하지 못했어요. 연결을 확인한 뒤 다시 수정해 주세요."}
+    },600);
+  }
+
+  /* time helpers */
+  function currentSlot(){
+    const m=now.getMonth()+1,y=now.getFullYear();
+    if(m>=3&&m<=6)return {year:y,term:"s1"};
+    if(m<=8&&m>=7)return {year:y,term:"su"};
+    if(m>=9&&m<=11)return {year:y,term:"s2"};
+    return {year:m===12?y:y-1,term:"wi"};
+  }
+  const slotKey=(y,t)=>y*4+TERM_ORDER[t];
+  function grade(y){const g=y-state.startYear+1;return g>=1?g+"학년":"입학 전"}
+  function dueInfo(d){
+    if(!d)return null;
+    const dt=new Date(d+"T00:00:00");if(isNaN(dt))return null;
+    const days=Math.round((dt-today)/864e5);
+    const label=`${dt.getMonth()+1}.${dt.getDate()}`;
+    return {days,label,dday:days>0?`D-${days}`:days===0?"D-DAY":`${-days}일 지남`,soon:days<=30};
+  }
+  const years=()=>Array.from({length:state.count},(_,i)=>state.startYear+i);
+
+  /* render full */
+  function itemHTML(it){
+    const di=dueInfo(it.due);
+    return `<li class="it c-${it.type}${it.done?" done":""}">
+      <input type="checkbox" id="c-${it.id}" data-act="toggle" data-id="${it.id}" ${it.done?"checked":""} aria-label="${esc(it.title)} 완료">
+      <div class="body">
+        <span class="t" data-act="edit" data-id="${it.id}" role="button" tabindex="0">${esc(it.title)}</span>
+        <span class="m"><span class="type">${TYPES[it.type]}</span>${it.target?`<span class="tgt">목표 ${esc(it.target)}</span>`:""}${di?`<span class="due${di.soon&&!it.done&&di.days>=0?" soon":""}">${di.label} · ${di.dday}</span>`:""}</span>
+      </div>
+      <button class="x" data-act="del" data-id="${it.id}" aria-label="삭제">×</button>
+    </li>`;
+  }
+  function sheetHTML(y,t,it){
+    const v=it||{title:"",type:"class",target:"",due:""};
+    return `<form class="sheet" data-year="${y}" data-term="${t}" ${it?`data-id="${it.id}"`:""}>
+      <input id="f-title" name="title" placeholder="예: 토플 시험, 선형대수학" value="${esc(v.title)}" maxlength="60" required>
+      <div class="row">
+        <select id="f-type" name="type" aria-label="종류">${Object.entries(TYPES).map(([k,l])=>`<option value="${k}"${k===v.type?" selected":""}>${l}</option>`).join("")}</select>
+        <input id="f-target" name="target" placeholder="목표 (예: 5.5)" value="${esc(v.target)}" maxlength="20">
+      </div>
+      <div class="row">
+        <select id="f-term" name="term" aria-label="학기">${TERMS.map(([k,l])=>`<option value="${k}"${k===t?" selected":""}>${l}</option>`).join("")}</select>
+        <input id="f-due" name="due" type="date" value="${esc(v.due)}" aria-label="마감일 (선택)">
+      </div>
+      <div class="acts">${it?`<button type="button" class="danger" data-act="del" data-id="${it.id}">삭제</button>`:""}<button type="button" class="plain" data-act="cancel">취소</button><button class="primary">${it?"저장":"추가"}</button></div>
+    </form>`;
+  }
+  function renderBoard(){
+    const cs=currentSlot();
+    const html=years().map(y=>{
+      const its=state.items.filter(i=>i.year===y);
+      const done=its.filter(i=>i.done).length;
+      const pct=its.length?Math.round(done/its.length*100):0;
+      const terms=TERMS.map(([k,l])=>{
+        const list=its.filter(i=>i.term===k);
+        const isNow=cs.year===y&&cs.term===k;
+        const ed=editing&&editing.year===y&&editing.term===k;
+        return `<div class="term${isNow?" now":""}">
+          <span class="label">${l}${isNow?" · 지금":""}</span>
+          ${list.length?`<ul>${list.map(i=>ed&&editing.id===i.id?`<li>${sheetHTML(y,k,i)}</li>`:itemHTML(i)).join("")}</ul>`:""}
+          ${ed&&!editing.id?sheetHTML(y,k,null):`<button class="addbtn" data-act="add" data-year="${y}" data-term="${k}">+ 추가</button>`}
+        </div>`;
+      }).join("");
+      return `<section class="year${cs.year===y?" now":""}" aria-label="${y}년">
+        <div class="yhead">
+          <div><div class="y">${y}</div><div class="g"><b>${grade(y)}</b>${cs.year===y?"<span>올해</span>":""}</div></div>
+          <div>${confirmYear===y
+            ?`<div class="yconfirm">이 해를 지울까요? <button class="icon" data-act="yesyear">지우기</button><button class="icon" data-act="noyear">취소</button></div>`
+            :`<div class="ypct">${done}/${its.length} · ${pct}%</div><div class="ybar"><i style="width:${pct}%"></i></div>${y===years().at(-1)&&state.count>1?`<div style="text-align:right"><button class="icon" data-act="delyear">마지막 해 지우기</button></div>`:""}`}</div>
+        </div>
+        ${terms}
+      </section>`;
+    }).join("")+`<button class="addyear" data-act="addyear">+ ${state.startYear+state.count}년 추가<br><span style="font-size:12px">휴학·대학원 계획도 이어서</span></button>`;
+    $("board").innerHTML=html;
+    const f=$("board").querySelector(".sheet #f-title");if(f)f.focus();
+  }
+  function upcoming(){
+    const cs=currentSlot(),ck=slotKey(cs.year,cs.term);
+    return state.items.filter(i=>!i.done&&slotKey(i.year,i.term)>=ck)
+      .sort((a,b)=>{
+        const da=a.due?new Date(a.due):null,db=b.due?new Date(b.due):null;
+        const ka=slotKey(a.year,a.term),kb=slotKey(b.year,b.term);
+        if(ka!==kb)return ka-kb;
+        if(da&&db)return da-db;return da?-1:db?1:0;
+      });
+  }
+  function renderStrip(){
+    const cs=currentSlot();
+    $("sNow").innerHTML=`${grade(cs.year)}<span> ${TERMS.find(t=>t[0]===cs.term)[1]}</span>`;
+    const done=state.items.filter(i=>i.done).length;
+    $("sDone").innerHTML=`${done}<span> / ${state.items.length}</span>`;
+    $("sTerm").textContent=state.items.filter(i=>i.year===cs.year&&i.term===cs.term&&!i.done).length;
+    const withDue=state.items.filter(i=>!i.done&&dueInfo(i.due)&&dueInfo(i.due).days>=0).sort((a,b)=>new Date(a.due)-new Date(b.due))[0];
+    $("sNext").textContent=withDue?`${withDue.title}${withDue.target?" "+withDue.target:""} · ${dueInfo(withDue.due).dday}`:"없음";
+    $("startYear").value=state.startYear;
+  }
+
+  /* widget */
+  function renderWidget(){
+    const cs=currentSlot();
+    const its=state.items.filter(i=>i.year===cs.year);
+    const p=its.length?its.filter(i=>i.done).length/its.length:0;
+    const r=26,c=2*Math.PI*r;
+    const next=upcoming().slice(0,4);
+    const tname=k=>TERMS.find(t=>t[0]===k)[1];
+    $("wcard").innerHTML=`
+      <div class="wtop">
+        <div><span class="label">대학 로드맵</span><div class="y">${cs.year}</div><div class="g">${grade(cs.year)} ${tname(cs.term)}</div></div>
+        <svg class="ring" viewBox="0 0 64 64" role="img" aria-label="올해 ${Math.round(p*100)}% 완료">
+          <circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--line)" stroke-width="6"></circle>
+          <circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--accent)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c*p} ${c}" transform="rotate(-90 32 32)"></circle>
+          <text x="32" y="36" text-anchor="middle">${Math.round(p*100)}%</text>
+        </svg>
+      </div>
+      <div><span class="label">다음 할 일</span></div>
+      ${next.length?`<ul class="wlist">${next.map(i=>{const di=dueInfo(i.due);return `<li class="c-${i.type}"><div><div class="t">${esc(i.title)}${i.target?` · ${esc(i.target)}`:""}</div><div class="s">${i.year} ${tname(i.term)} · ${TYPES[i.type]}</div></div><span class="d${di&&di.soon&&di.days>=0?" soon":""}">${di?di.dday:""}</span></li>`}).join("")}</ul>`:`<p class="s" style="color:var(--muted);margin:0">남은 계획이 없어요. 로드맵에서 추가해 보세요.</p>`}
+      <div class="wfoot"><span style="color:var(--muted)">전체 ${state.items.filter(i=>i.done).length}/${state.items.length} 완료</span><a href="#">전체 로드맵 →</a></div>`;
+  }
+
+  function route(){
+    const w=location.hash==="#widget";
+    $("full").hidden=w;$("widgetView").hidden=!w;
+    renderAll();
+  }
+  function renderAll(){
+    if(location.hash==="#widget")renderWidget();
+    else{renderStrip();renderBoard();$("sampleBanner").hidden=!isSample}
+  }
+  const find=id=>state.items.find(i=>i.id===id);
+
+  /* events */
+  document.addEventListener("click",e=>{
+    const b=e.target.closest("[data-act],#clearSample");if(!b)return;
+    if(b.id==="clearSample"){state={startYear:state.startYear,count:4,items:[]};isSample=false;touch();renderAll();return}
+    const a=b.dataset.act;
+    if(a==="add"){editing={year:+b.dataset.year,term:b.dataset.term};confirmYear=null;renderBoard()}
+    else if(a==="edit"){const it=find(b.dataset.id);if(it){editing={year:it.year,term:it.term,id:it.id};renderBoard()}}
+    else if(a==="cancel"){editing=null;renderBoard()}
+    else if(a==="del"){state.items=state.items.filter(i=>i.id!==b.dataset.id);editing=null;touch();renderAll()}
+    else if(a==="addyear"){state.count++;touch();renderAll()}
+    else if(a==="delyear"){confirmYear=years().at(-1);renderBoard()}
+    else if(a==="noyear"){confirmYear=null;renderBoard()}
+    else if(a==="yesyear"){const y=years().at(-1);state.items=state.items.filter(i=>i.year!==y);state.count--;confirmYear=null;touch();renderAll()}
+  });
+  document.addEventListener("keydown",e=>{
+    if((e.key==="Enter"||e.key===" ")&&e.target.dataset?.act==="edit"){e.preventDefault();e.target.click()}
+    if(e.key==="Escape"&&editing){editing=null;renderBoard()}
+  });
+  document.addEventListener("change",e=>{
+    const t=e.target;
+    if(t.dataset.act==="toggle"){const it=find(t.dataset.id);if(it){it.done=t.checked;touch();renderAll();const el=$("c-"+it.id);el&&el.focus()}}
+    if(t.id==="startYear"){const v=+t.value;if(v>=2000&&v<=2100){
+      const shift=v-state.startYear;state.items.forEach(i=>i.year+=shift);state.startYear=v;touch();renderAll()}}
+  });
+  document.addEventListener("submit",e=>{
+    e.preventDefault();
+    const f=e.target;if(!f.classList.contains("sheet"))return;
+    const fd=new FormData(f);const title=String(fd.get("title")||"").trim();if(!title)return;
+    const data={title,type:fd.get("type"),target:String(fd.get("target")||"").trim(),term:fd.get("term"),due:fd.get("due")||""};
+    if(f.dataset.id){Object.assign(find(f.dataset.id),data)}
+    else state.items.push({id:uid(),year:+f.dataset.year,done:false,...data});
+    editing=null;touch();renderAll();
+  });
+  window.addEventListener("hashchange",route);
+  document.getElementById("exportBtn").addEventListener("click",()=>{
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+    const d=new Date();a.download=`roadmap-backup-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}.json`;
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  });
+  document.getElementById("importFile").addEventListener("change",async e=>{
+    const f=e.target.files[0];if(!f)return;
+    try{const d=JSON.parse(await f.text());
+      if(!d||!Array.isArray(d.items)||!d.startYear)throw 0;
+      state=d;isSample=false;editing=null;touch();renderAll();$("saveState").textContent="백업을 불러왔어요";
+    }catch(err){$("saveState").textContent="불러오지 못했어요. 이 사이트에서 저장한 백업 파일(.json)인지 확인해 주세요."}
+    e.target.value="";
+  });
+  if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+
+  /* boot */
+  state=sample();isSample=true;route();
+  initStore().then(async s=>{
+    store=s;let d=null;
+    try{d=await s.load()}catch(e){}
+    if(d&&Array.isArray(d.items)){state=d;isSample=false;$("saveState").textContent="이 브라우저에 저장됨"}
+    else $("saveState").textContent="예시 표시 중 · 아직 저장된 계획 없음";
+    renderAll();
+  });
+})();
+</script>
+
+</body>
+</html>
